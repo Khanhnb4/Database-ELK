@@ -1,0 +1,23 @@
+services:
+  logstash:
+    image: docker.elastic.co/logstash/logstash:7.7.1
+    network_mode: "host"
+    container_name: logstash
+    configs:
+      - source: logstash-config
+        target: /usr/share/logstash/config/logstash.yml
+      - source: logstash-pipeline
+        target: /usr/share/logstash/config/pipelines.yml
+    volumes:
+      - logstash:/usr/share/logstash/data
+    expose:
+      - 5044:5044
+
+volumes:
+  logstash:
+
+configs:
+  logstash-config:
+    file: $PWD/logstash.yml
+  logstash-pipeline:
+    file: $PWD/pipelines.yml
