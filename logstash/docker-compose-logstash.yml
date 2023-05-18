@@ -1,7 +1,6 @@
 services:
   logstash:
     image: docker.elastic.co/logstash/logstash:7.7.1
-    network_mode: "host"
     container_name: logstash
     configs:
       - source: logstash-config
@@ -9,9 +8,14 @@ services:
       - source: logstash-pipeline
         target: /usr/share/logstash/config/pipelines.yml
     volumes:
+      - ./audit-trail.conf:/usr/share/logstash/pipeline/audit-trail.conf
+      - ./laravel-log.conf:/usr/share/logstash/pipeline/laravel-log.conf
+      - ./search.conf:/usr/share/logstash/pipeline/search.conf
       - logstash:/usr/share/logstash/data
-    expose:
+    ports:
       - 5044:5044
+      - 5045:5045
+      - 5046:5046
 
 volumes:
   logstash:
