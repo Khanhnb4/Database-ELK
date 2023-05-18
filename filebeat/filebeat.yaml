@@ -1,0 +1,68 @@
+filebeat.config.modules:
+  path: ${path.config}/modules.d/*.yml
+  reload.enabled: true
+
+filebeat.inputs:
+  - type: log
+    enabled: true
+    tags:
+      - operator
+    paths:
+      - /opt/operator/storage/logs/laravel-*.log
+    multiline:
+      pattern: '^\[[0-9]{4}-[0-9]{2}-[0-9]{2}'
+      negate: true
+      match: after
+  - type: log
+    enabled: true
+    tags:
+      - loyalty-service
+    paths:
+      - /opt/loyalty-service/storage/logs/laravel-*.log
+    multiline:
+      pattern: '^\[[0-9]{4}-[0-9]{2}-[0-9]{2}'
+      negate: true
+      match: after
+  - type: log
+    enabled: true
+    tags:
+      - subscription-service
+    paths:
+      - /opt/subscription-service/storage/logs/laravel-*.log
+    multiline:
+      pattern: '^\[[0-9]{4}-[0-9]{2}-[0-9]{2}'
+      negate: true
+      match: after
+
+processors:
+  - add_fields:
+      target: '@metadata'
+      fields:
+        hostname: "dc1p-kpro-op-01"
+  - drop_fields:
+      fields: ["agent.ephemeral_id", "agent.hostname", "agent.id", "agent.type", "agent.version", "agent.name", "ecs.version", "input.type", "log.offset", "stream"]
+
+setup.template:
+  enabled: false
+  name: "filebeat-%{[agent.version]}"
+  pattern: "filebeat-*"
+  overwrite: true
+
+setup.ilm.enabled: false
+
+logging.metrics.enabled: false
+
+output.logstash:
+  hosts:
+    - "10.12.51.61:5045"
+    - "10.12.51.62:5045"
+  loadbalance: true
+  index: filebeat
+  bulk_max_size: 2048
+
+logging:
+  level: error
+  to_files: true
+  files:
+    path: /var/log/filebeat
+    name: filebeat
