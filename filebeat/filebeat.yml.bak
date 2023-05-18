@@ -1,0 +1,44 @@
+filebeat.config.modules:
+  path: ${path.config}/modules.d/*.yml
+  reload.enabled: true
+
+filebeat.inputs:
+  - type: log
+    enabled: true
+    tags:
+      - audit-trail
+    paths:
+      - /opt/operator/storage/logs/audit-trail/*.log
+    multiline:
+      pattern: '^\[[0-9]{4}-[0-9]{2}-[0-9]{2}'
+      negate: true
+      match: after
+
+processors:
+  - drop_fields:
+      fields: ["agent.ephemeral_id", "agent.hostname", "agent.id", "agent.type", "agent.version", "agent.name", "ecs.version", "input.type", "log.offset", "stream"]
+
+setup.template:
+  enabled: false
+  name: "filebeat-%{[agent.version]}"
+  pattern: "filebeat-*"
+  overwrite: true
+
+setup.ilm.enabled: false
+
+logging.metrics.enabled: false
+
+output.logstash:
+  hosts:
+    - "10.12.51.61:5044"
+    - "10.12.51.62:5044"
+  loadbalance: true
+  index: filebeat
+  bulk_max_size: 2048
+
+logging:
+  level: error
+  to_files: true
+  files:
+    path: /var/log/filebeat
+    name: filebeat
