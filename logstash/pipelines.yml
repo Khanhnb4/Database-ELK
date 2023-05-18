@@ -3,8 +3,11 @@
 # https://www.elastic.co/guide/en/logstash/current/multiple-pipelines.html
 
 - pipeline.id: laravel-log
-  path.config: "/etc/logstash/conf.d/laravel-log.conf"
+  path.config: "/usr/share/logstash/pipeline/laravel-log.conf"
   pipeline.workers: 2
 - pipeline.id: audit-trail
-  path.config: "/etc/logstash/conf.d/audit-trail.conf"
+  path.config: "/usr/share/logstash/pipeline/audit-trail.conf"
   pipeline.workers: 1
+- pipeline.id: search
+  path.config: "/usr/share/logstash/pipeline/search.conf"
+  pipeline.workers: 2
